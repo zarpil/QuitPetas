@@ -673,6 +673,10 @@ const App = {
 
   async navigate(page, pushState = true) {
     if (!this.pages[page]) return;
+    
+    // Concurrency guard to prevent multiple simultaneous loads
+    if (this._isNavigating && this.currentPage === page) return;
+    this._isNavigating = true;
     this.currentPage = page;
 
     if (pushState) {
@@ -691,15 +695,24 @@ const App = {
       await this.pages[page].load();
     } catch (err) {
       console.error(`Error loading ${page}:`, err);
+    } finally {
+      this._isNavigating = false;
     }
   },
 
   showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     if (!toast) return;
+
+    if (this._toastTimeout) clearTimeout(this._toastTimeout);
+
     toast.textContent = message;
     toast.className = `toast ${type} visible`;
-    setTimeout(() => toast.classList.remove('visible'), 3000);
+
+    this._toastTimeout = setTimeout(() => {
+      toast.classList.remove('visible');
+      this._toastTimeout = null;
+    }, 3000);
   },
 };
 

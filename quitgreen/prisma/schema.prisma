@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String
+  onboarded       Boolean   @default(false)
+
+  // Profile — filled during onboarding
+  name            String?
+  age             Int?
+  substanceType   String?   // "marihuana", "hachis", "ambos"
+  dailyJoints     Float?    // porros al día (promedio)
+  gramsPerJoint   Float?    // gramos aprox por peta
+  pricePerGram    Float?    // precio por gramo en euros
+  monthlySpend    Float?    // gasto mensual calculado o manual
+  yearsSmoked     Int?      // años fumando
+  smokeAlone      Boolean?  // fuma solo o en grupo
+  smokeTrigger    String?   // cuándo suele fumar más: "mañana","tarde","noche","todo el dia"
+  motivation      String?   // por qué quiere dejarlo (texto libre)
+  previousAttempts Int?     // intentos previos de dejarlo
+  previousRelapseCause String? // causa principal de recaída anterior
+  tobaccoMix      Boolean?  // si mezcla con tabaco
+
+  planType        String?   @default("COLD_TURKEY") // "COLD_TURKEY", "TAPER_FREQ", "TAPER_GRAMS"
+  quitDate        DateTime? // se establece cuando empieza el reto
+  longestStreak   Int?      @default(0) // mejor racha registrada
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  checkins     CheckIn[]
+  cravings     Craving[]
+  journal      JournalEntry[]
+  achievements UserAchievement[]
+  messages     ChatMessage[]
+  smokingLogs  SmokingLog[]
+  pushSubs     PushSubscription[]
+  groups       GroupMember[]
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  name      String
+  joinCode  String   @unique
+  adminId   Int
+  createdAt DateTime @default(now())
+
+  members   GroupMember[]
+}
+
+model GroupMember {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  groupId   Int
+  joinedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+model SmokingLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  grams       Float?   // cantidad en gramos
+  substance   String?  // "marihuana" / "hachis"
+  situation   String?  // dónde/cuándo (solo, con amigos, en casa...)
+  mood        Int?     // 1-5 estado de ánimo antes de fumar
+  note        String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model CheckIn {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime @default(now())
+  smoked    Boolean  @default(false)
+  mood      Int?     // 1-5
+  note      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, createdAt])
+}
+
+model Craving {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  intensity Int      // 1-10
+  trigger   String?
+  strategy  String?
+  resisted  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model JournalEntry {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  content   String
+  mood      Int?     // 1-5
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Achievement {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  name        String
+  description String
+  icon        String
+  requirement Int
+
+  users UserAchievement[]
+}
+
+model UserAchievement {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

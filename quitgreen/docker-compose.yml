@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: quitpetas-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-quituser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quitpass}
+      POSTGRES_DB: ${POSTGRES_DB:-quitpetas}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+# Database port only accessible within the docker network
+
+  app:
+    build: .
+    container_name: quitpetas-app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-quituser}:${POSTGRES_PASSWORD:-quitpass}@db:5432/${POSTGRES_DB:-quitpetas}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:

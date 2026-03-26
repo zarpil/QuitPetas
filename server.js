@@ -19,12 +19,20 @@ app.use(helmet({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       "img-src": ["'self'", "data:", "https:"],
-      "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"], // Allow Chart.js and DOMPurify
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net"], // Allow Chart.js maps
+      "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+      "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
+      "font-src": ["'self'", "https://fonts.gstatic.com"],
+      "connect-src": [
+        "'self'", 
+        "https://cdn.jsdelivr.net", 
+        "https://fonts.googleapis.com", 
+        "https://fonts.gstatic.com", 
+        "https://cdnjs.cloudflare.com"
+      ],
     },
   },
-  crossOriginOpenerPolicy: { policy: "unsafe-none" }, // Relax for local IP/HTTP
-  hsts: true, // Disable HSTS to prevent ERR_SSL_PROTOCOL_ERROR on local storage/IPs
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  hsts: false, // Explicitly disable HSTS for local development stability
 }));
 
 const globalLimiter = rateLimit({
@@ -100,10 +108,16 @@ app.get('*', (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled Error:', err);
+  console.error('CRITICAL ERROR:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body
+  });
   res.status(500).json({
     error: 'Algo salió mal en el servidor.',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Error interno del servidor'
   });
 });
 

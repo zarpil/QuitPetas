@@ -45,7 +45,10 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ error: 'Error al registrarse' });
+    res.status(500).json({ 
+      error: 'Error al registrarse',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
@@ -53,6 +56,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
@@ -62,6 +69,11 @@ router.post('/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET missing in environment');
+      return res.status(500).json({ error: 'Error de configuración del servidor' });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -83,7 +95,10 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+    res.status(500).json({ 
+      error: 'Error al iniciar sesión',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 

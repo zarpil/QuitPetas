@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  db:
+  quitpetas_db:
     image: postgres:15-alpine
     container_name: quitpetas-db
     restart: always
@@ -18,9 +18,9 @@ services:
     container_name: quitpetas-app
     restart: always
     depends_on:
-      - db
+      - quitpetas_db
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-quituser}:${POSTGRES_PASSWORD:-quitpass}@db:5432/${POSTGRES_DB:-quitpetas}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-quituser}:${POSTGRES_PASSWORD:-quitpass}@quitpetas_db:5432/${POSTGRES_DB:-quitpetas}?schema=public
       JWT_SECRET: ${JWT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
@@ -28,7 +28,7 @@ services:
       NODE_ENV: production
       PORT: 3000
     ports:
-      - "3000:3000"
+      - "3005:3000"
 
 volumes:
   postgres_data:

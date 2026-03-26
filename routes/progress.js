@@ -1,10 +1,9 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../utils/prisma');
 const auth = require('../middleware/auth');
 const { sendPushToUser } = require('../utils/push');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // GET /api/progress — stats del usuario
 router.get('/', auth, async (req, res) => {

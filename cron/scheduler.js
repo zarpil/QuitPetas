@@ -1,7 +1,6 @@
 const cron = require('node-cron');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../utils/prisma');
 const { sendPushToUser } = require('../utils/push');
-const prisma = new PrismaClient();
 
 function initScheduler() {
   console.log('⏰ Notification scheduler initialized');

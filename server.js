@@ -5,11 +5,10 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const path = require('path');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('./utils/prisma');
 const { initScheduler } = require('./cron/scheduler');
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
 // Security & Global Middleware

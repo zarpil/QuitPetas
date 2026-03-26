@@ -1,10 +1,9 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../utils/prisma');
 const auth = require('../middleware/auth');
 const { sendPushToUser } = require('../utils/push');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuB23C4-IE96w7pAivvE_-PTEI';
 const privateVapidKey = process.env.VAPID_PRIVATE_KEY || '8tBIt5z8hJxy9SqzUfG2E2XoUq14zZq9f1Tqz9o7sXo';

@@ -1,10 +1,9 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../utils/prisma');
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Generar código de grupo aleatorio
 function generateJoinCode() {

@@ -1,6 +1,5 @@
 const webpush = require('web-push');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('./prisma');
 
 const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuB23C4-IE96w7pAivvE_-PTEI';
 const privateVapidKey = process.env.VAPID_PRIVATE_KEY || '8tBIt5z8hJxy9SqzUfG2E2XoUq14zZq9f1Tqz9o7sXo';

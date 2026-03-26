@@ -80,9 +80,9 @@ const SocialPage = {
       }
 
       listEl.innerHTML = groups.map(g => `
-        <div class="card group-card" onclick="SocialPage.viewGroup(${g.id})">
+        <div class="card group-card" data-id="${g.id}">
           <div class="group-info">
-            <h4 class="group-name">${g.name}</h4>
+            <h4 class="group-name">${DOMPurify.sanitize(g.name)}</h4>
             <div class="group-stats">
               <span>👥 ${g.memberCount} miembros</span>
               <span>🔑 Código: <strong style="color:var(--primary);">${g.joinCode}</strong></span>
@@ -91,6 +91,11 @@ const SocialPage = {
           <div class="group-arrow">→</div>
         </div>
       `).join('');
+
+      // Bind group click events
+      listEl.querySelectorAll('.group-card').forEach(card => {
+        card.onclick = () => this.viewGroup(card.dataset.id);
+      });
     } catch (err) {
       listEl.innerHTML = `<p class="error">Error: ${err.message}</p>`;
     }
